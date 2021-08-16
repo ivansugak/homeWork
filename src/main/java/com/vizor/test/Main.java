@@ -29,11 +29,16 @@ public class Main extends Frame {
     }
 
     public static void main(String[] args) throws IOException {
+
+
+
         SwingUtilities.invokeLater(new Main()::run);
 
         Gallery gallery = new Gallery();
         Thread thread = new Thread(gallery);
         thread.start();
+
+
 
 
 //        JFrame frame = new JFrame("DT Developer Test");

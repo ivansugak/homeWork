@@ -9,17 +9,38 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class Gallery extends JFrame implements Runnable{
 
     public static JPanel jPanel = new JPanel();
     public static int curImageIndex=0;
-    private BufferedImage image;
+    private BufferedImage myPicture;
+    ImageIO [] galleryImage;
+    File[] image;
+    BufferedImage[] images;
 
 
     public Gallery() throws IOException {
-        BufferedImage myPicture = ImageIO.read(new File("..//dt-developer-test//assets"));
-        JLabel picLabel = new JLabel(new ImageIcon(myPicture));
+
+        try {
+            File dir = new File("assets");
+
+            File[] imageFiles = dir.listFiles();
+            images = new BufferedImage[imageFiles.length];
+            for (int i = 0; i < imageFiles.length; i++) {
+                images[i] = ImageIO.read(imageFiles[i]);
+            }
+
+
+//            myPicture = ImageIO.read(new File("assets").listFiles()[0]);
+
+        } catch (NullPointerException e){
+            e.getStackTrace();
+        }
+
+        JLabel picLabel = new JLabel(new ImageIcon(images[0]));
         add(picLabel);
 //        File fi = new File("..//dt-developer-test//assets");
 //        byte[] fileContent = Files.readAllBytes(fi.toPath());
@@ -53,12 +74,12 @@ public class Gallery extends JFrame implements Runnable{
 
     @Override
     public void run() {
-        File fi = new File("..//dt-developer-test//assets");
-        try {
-            byte[] fileContent = Files.readAllBytes(fi.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        File fi = new File("..//dt-developer-test//assets");
+//        try {
+//            byte[] fileContent = Files.readAllBytes(fi.toPath());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         ButtonLoad load = new ButtonLoad ();
 //        PlayButtonListener PlayButton = new PlayButtonListener ();
