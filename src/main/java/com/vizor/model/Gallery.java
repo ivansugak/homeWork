@@ -1,119 +1,128 @@
 package com.vizor.model;
 
-import com.vizor.test.Main;
-
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageInputStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.file.Files;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Stream;
-
-public class Gallery extends JFrame implements Runnable{
-
-    public static JPanel jPanel = new JPanel();
-    public static int curImageIndex=0;
-    private BufferedImage myPicture;
-    ImageIO [] galleryImage;
-    File[] image;
-    BufferedImage[] images;
+import java.util.List;
 
 
-    public Gallery() throws IOException {
+public class Gallery extends JPanel {
 
-        try {
-            File dir = new File("assets");
+    public static final String IMG_DIR = "assets/";
+    private final ImagePanel imagePanel = new ImagePanel();
+    private final NavigationPanel navigationPanel = new NavigationPanel();
+    private final List<String> images = new ArrayList<>();
+    public static final int PAGE_SIZE = 1;
+    private int currentPage = 0;
 
-            File[] imageFiles = dir.listFiles();
-            images = new BufferedImage[imageFiles.length];
-            for (int i = 0; i < imageFiles.length; i++) {
-                images[i] = ImageIO.read(imageFiles[i]);
+    public Gallery() {
+        init();
+        loadAssets();
+        loadImages();
+        initButtons();
+        initButtonLoad();
+        initButtonPrevious();
+        initButtonSizeDown();
+    }
+
+    private void init() {
+        setLayout(new BorderLayout());  //setLayout(new GridLayout(2, 1));
+        add(imagePanel, BorderLayout.CENTER);
+        add(navigationPanel, BorderLayout.SOUTH);
+    }
+
+    private void loadImages() {
+        imagePanel.loadImages(images.subList(PAGE_SIZE * currentPage, (currentPage + 1) * PAGE_SIZE));
+    }
+
+    private void loadAssets() {
+        File dir = new File(IMG_DIR);
+        final String[] imageFiles = dir.list();
+        if (imageFiles != null) {
+            Arrays.asList(imageFiles).forEach(f -> images.add(IMG_DIR + f));
+        }
+    }
+
+
+    private void initButtons() {
+        navigationPanel.getNextButton().addActionListener(e -> {
+            if ((currentPage + 1) * PAGE_SIZE < images.size()) {
+                currentPage++; //if ??
+                loadImages();
+                validate();
+                repaint();
+            } else {
+//                               navigationPanel.getNextButton().setEnabled(false);
+            }
+        });
+    }
+
+    private void initButtonLoad() {
+        navigationPanel.getLoadButton().addActionListener(e -> {
+            JFileChooser jFileChooser = new JFileChooser();
+            jFileChooser.setMultiSelectionEnabled(true);
+            jFileChooser.setDialogTitle("Save file");
+            int a = jFileChooser.showSaveDialog(navigationPanel);
+            File file = jFileChooser.getSelectedFile();
+            String fileName = jFileChooser.getName();
+
+            try {
+                FileInputStream fis;
+                FileOutputStream fos;
+                fis=new FileInputStream(file);
+                fos=new FileOutputStream("assets/fileName.png");
+                byte[] buffer = new byte[fis.available()];
+                fis.read(buffer, 0, buffer.length);
+                fos.write(buffer, 0, buffer.length);
+                fis.close();
+                fos.close();
+            }
+            catch(IOException m){
+               m.getStackTrace();
             }
 
-
-//            myPicture = ImageIO.read(new File("assets").listFiles()[0]);
-
-        } catch (NullPointerException e){
-            e.getStackTrace();
-        }
-
-        JLabel picLabel = new JLabel(new ImageIcon(images[0]));
-        add(picLabel);
-//        File fi = new File("..//dt-developer-test//assets");
-//        byte[] fileContent = Files.readAllBytes(fi.toPath());
-//
-//        ButtonLoad load = new ButtonLoad ();
-////        PlayButtonListener PlayButton = new PlayButtonListener ();
-////        StopButtonListener StopButton = new StopButtonListener ();
-////        NextButtonListener NextButton = new NextButtonListener ();
-//
-//
-//        JButton jButtonLoad = new JButton("loading image");
-//        JButton jButtonSizeUp = new JButton("+ size image");
-//        JButton jButtonSizeDown = new JButton("- size image");
-//        JButton jButtonPrevious = new JButton ("Previous");
-//        JButton jButtonNext = new JButton ("Next");
-//        jPanel.add(jButtonLoad);
-//        jPanel.add(jButtonSizeUp);
-//        jPanel.add(jButtonSizeDown);
-//        jPanel.add(jButtonPrevious);
-//        jPanel.add(jButtonNext);
-//
-//        //add listeners to corresponding componenets
-//        jButtonLoad.addActionListener(load);
-////        jButtonSizeUp.addActionListener(PlayButton);
-////        jButtonSizeDown.addActionListener(StopButton);
-////        jButtonPrevious.addActionListener(NextButton);
-////        jButtonNext.addActionListener(NextButton);
-
-
+            validate();
+            repaint();
+        });
     }
 
-    @Override
-    public void run() {
-//        File fi = new File("..//dt-developer-test//assets");
-//        try {
-//            byte[] fileContent = Files.readAllBytes(fi.toPath());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-        ButtonLoad load = new ButtonLoad ();
-//        PlayButtonListener PlayButton = new PlayButtonListener ();
-//        StopButtonListener StopButton = new StopButtonListener ();
-//        NextButtonListener NextButton = new NextButtonListener ();
-
-        JButton jButtonLoad = new JButton("loading image");
-        JButton jButtonSizeUp = new JButton("+ size image");
-        JButton jButtonSizeDown = new JButton("- size image");
-        JButton jButtonPrevious = new JButton ("Previous");
-        JButton jButtonNext = new JButton ("Next");
-        jPanel.add(jButtonLoad);
-        jPanel.add(jButtonSizeUp);
-        jPanel.add(jButtonSizeDown);
-        jPanel.add(jButtonPrevious);
-        jPanel.add(jButtonNext);
-
-        //add listeners to corresponding componenets
-        jButtonLoad.addActionListener(load);
-//        jButtonSizeUp.addActionListener(PlayButton);
-//        jButtonSizeDown.addActionListener(StopButton);
-//        jButtonPrevious.addActionListener(NextButton);
-//        jButtonNext.addActionListener(NextButton);
+    private void initButtonPrevious() {
+        navigationPanel.getPreviousButton().addActionListener(e -> {
+            if ((currentPage - 1) * PAGE_SIZE != 0) {
+                currentPage--; //if ??
+                loadImages();
+                validate();
+                repaint();
+            } else {
+                currentPage = 0;
+                loadImages();
+                validate();
+                repaint();
+            }
+        });
     }
 
-//    FileInputStream dir = new FileInputStream ("..//dt-developer-test//assets");
-//
-//    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(dir));
-//
-//    ImageIO[] image = ImageIO.
+    private void initButtonSizeDown() {
 
-//    File file = new File("..//dt-developer-test//assets");
-//    BufferedImage input = ImageIO.read(file);
+        navigationPanel.getSizeDownButton().addActionListener(e -> {
+            BufferedImage img = null;
+            try {
+                img = ImageIO.read(new File("assets/"));
+                Image dimg = img.getScaledInstance(50, 50,
+                        Image.SCALE_SMOOTH);
+                ImageIcon imageIcon = new ImageIcon(dimg);
+            } catch (IOException a) {
+                a.printStackTrace();
+            }
+        });
+    }
 
-//    JList myList = new JList(fileContent); //как реализовать добавление массива в JList?
-//    Main.frame.add(myList);
+
 }

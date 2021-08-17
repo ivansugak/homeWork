@@ -1,34 +1,37 @@
 package com.vizor.model;
 
-import com.vizor.test.Main;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.util.List;
+import static com.vizor.model.Gallery.PAGE_SIZE;
 
 public class ImagePanel extends JPanel {
 
-//    private BufferedImage image;
+    public ImagePanel() {
+        init();
+    }
 
-//    JList myList; //как реализовать добавление массива в JList?
-//    Main.frame.add(myList);
+    private void init() {
+        setLayout(new GridLayout(1, 3));
 
-//    public ImagePanel() {
-//        try {
-//            image = ImageIO.read(new File("assets").listFiles()[100]);
-//            JLabel picLabel = new JLabel(new ImageIcon(image));
-//            add(picLabel);
-//        } catch (IOException ex) {
-//            ex.getStackTrace();
-//        }
-//    }
-//
-//    @Override
-//    public void paintComponent(Graphics g) {
-//        g.drawImage(image, 0, 0, null);
-//    }
+        for (int i = 0; i < PAGE_SIZE; i++) {
+            final JLabel no_image = new JLabel("No image");
+            add(no_image);
+        }
+    }
 
+    public void loadImages(List<String> fileNames) {
+        removeAll();
+        for (int i = 0; i < PAGE_SIZE; i++) {
+            if (i < fileNames.size()) {
+                final JLabel jLabel = new JLabel(new ImageIcon(fileNames.get(i)));
+                add(jLabel);
+
+            } else {
+                final JLabel no_image = new JLabel("No image");
+                add(no_image);
+            }
+        }
+    }
 }
