@@ -19,27 +19,23 @@ public class Gallery extends JPanel {
     private final ImagePanel imagePanel = new ImagePanel();
     private final NavigationPanel navigationPanel = new NavigationPanel();
     private final List<String> images = new ArrayList<>();
-    public static final int PAGE_SIZE = 1;
-    private int currentPage = 0;
+    private int currentImageIndex = 0;
 
     public Gallery() {
         init();
         loadAssets();
-        loadImages();
+        loadImage();
         initButtons();
-        initButtonLoad();
-        initButtonPrevious();
-        initButtonSizeDown();
     }
 
     private void init() {
-        setLayout(new BorderLayout());  //setLayout(new GridLayout(2, 1));
+        setLayout(new BorderLayout());
         add(imagePanel, BorderLayout.CENTER);
         add(navigationPanel, BorderLayout.SOUTH);
     }
 
-    private void loadImages() {
-        imagePanel.loadImages(images.subList(PAGE_SIZE * currentPage, (currentPage + 1) * PAGE_SIZE));
+    private void loadImage() {
+        imagePanel.loadImage(images.get(currentImageIndex));
     }
 
     private void loadAssets() {
@@ -47,82 +43,66 @@ public class Gallery extends JPanel {
         final String[] imageFiles = dir.list();
         if (imageFiles != null) {
             Arrays.asList(imageFiles).forEach(f -> images.add(IMG_DIR + f));
+
         }
     }
 
 
     private void initButtons() {
         navigationPanel.getNextButton().addActionListener(e -> {
-            if ((currentPage + 1) * PAGE_SIZE < images.size()) {
-                currentPage++; //if ??
-                loadImages();
+            if (currentImageIndex < images.size() - 1) {
+                currentImageIndex++;
+                loadImage();
                 validate();
                 repaint();
-            } else {
-//                               navigationPanel.getNextButton().setEnabled(false);
+
             }
         });
-    }
 
-    private void initButtonLoad() {
         navigationPanel.getLoadButton().addActionListener(e -> {
             JFileChooser jFileChooser = new JFileChooser();
             jFileChooser.setMultiSelectionEnabled(true);
             jFileChooser.setDialogTitle("Save file");
             int a = jFileChooser.showSaveDialog(navigationPanel);
-            File file = jFileChooser.getSelectedFile();
-            String fileName = jFileChooser.getName();
+            if (a == 0) {
+                File file = jFileChooser.getSelectedFile();
 
-            try {
-                FileInputStream fis;
-                FileOutputStream fos;
-                fis=new FileInputStream(file);
-                fos=new FileOutputStream("assets/fileName.png");
-                byte[] buffer = new byte[fis.available()];
-                fis.read(buffer, 0, buffer.length);
-                fos.write(buffer, 0, buffer.length);
-                fis.close();
-                fos.close();
-            }
-            catch(IOException m){
-               m.getStackTrace();
+
+                try (FileInputStream fis = new FileInputStream(file);
+                     FileOutputStream fos = new FileOutputStream("assets/" + file.getName())) {
+                    byte[] buffer = new byte[fis.available()];
+                    fis.read(buffer, 0, buffer.length);
+                    fos.write(buffer, 0, buffer.length);
+
+                } catch (IOException m) {
+                    m.getStackTrace();
+                }
             }
 
             validate();
             repaint();
         });
-    }
 
-    private void initButtonPrevious() {
         navigationPanel.getPreviousButton().addActionListener(e -> {
-            if ((currentPage - 1) * PAGE_SIZE != 0) {
-                currentPage--; //if ??
-                loadImages();
-                validate();
-                repaint();
-            } else {
-                currentPage = 0;
-                loadImages();
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+                loadImage();
                 validate();
                 repaint();
             }
         });
-    }
-
-    private void initButtonSizeDown() {
 
         navigationPanel.getSizeDownButton().addActionListener(e -> {
-            BufferedImage img = null;
             try {
-                img = ImageIO.read(new File("assets/"));
-                Image dimg = img.getScaledInstance(50, 50,
+                BufferedImage img = ImageIO.read(new File(IMG_DIR + images.get(currentImageIndex)));
+                Image dimg = img.getScaledInstance(10, 10,
                         Image.SCALE_SMOOTH);
                 ImageIcon imageIcon = new ImageIcon(dimg);
             } catch (IOException a) {
                 a.printStackTrace();
             }
         });
-    }
 
+    }
 
 }
