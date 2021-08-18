@@ -11,19 +11,15 @@ public class ImagePanel extends JPanel {
 
     private void init() {
         setLayout(new GridLayout(1, 3));
-
-
         final JLabel no_image = new JLabel("No image");
         add(no_image);
 
     }
 
-    public void loadImage(String fileName) {
+    public void loadImage(Image image) {
         removeAll();
 
-        final JLabel jLabel = new JLabel(new ImageIcon(fileName));
+        final JLabel jLabel = new JLabel(new ImageIcon(image));
         add(jLabel);
     }
-
-
 }

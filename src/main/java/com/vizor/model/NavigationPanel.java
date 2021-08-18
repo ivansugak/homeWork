@@ -1,7 +1,5 @@
 package com.vizor.model;
 
-import com.vizor.test.Main;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -23,32 +21,24 @@ public class NavigationPanel extends JPanel {
         setLayout(new GridLayout(1,4));
 
         add(loadButton);
-
         add(sizeUpButton);
-
         add(sizeDownButton);
-
         add(previousButton);
-
         add(nextButton);
     }
 
     public JButton getNextButton() {
         return nextButton;
     }
-
     public JButton getLoadButton() {
         return loadButton;
     }
-
     public JButton getSizeUpButton() {
         return sizeUpButton;
     }
-
     public JButton getSizeDownButton() {
         return sizeDownButton;
     }
-
     public JButton getPreviousButton() {
         return previousButton;
     }

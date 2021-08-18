@@ -3,7 +3,6 @@ package com.vizor.model;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,6 +19,7 @@ public class Gallery extends JPanel {
     private final NavigationPanel navigationPanel = new NavigationPanel();
     private final List<String> images = new ArrayList<>();
     private int currentImageIndex = 0;
+    private Image currentImage;
 
     public Gallery() {
         init();
@@ -35,7 +35,13 @@ public class Gallery extends JPanel {
     }
 
     private void loadImage() {
-        imagePanel.loadImage(images.get(currentImageIndex));
+        try {
+            Image image = ImageIO.read(new File(images.get(currentImageIndex)));
+            currentImage = image;
+            imagePanel.loadImage(image);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadAssets() {
@@ -47,17 +53,7 @@ public class Gallery extends JPanel {
         }
     }
 
-
     private void initButtons() {
-        navigationPanel.getNextButton().addActionListener(e -> {
-            if (currentImageIndex < images.size() - 1) {
-                currentImageIndex++;
-                loadImage();
-                validate();
-                repaint();
-
-            }
-        });
 
         navigationPanel.getLoadButton().addActionListener(e -> {
             JFileChooser jFileChooser = new JFileChooser();
@@ -67,42 +63,61 @@ public class Gallery extends JPanel {
             if (a == 0) {
                 File file = jFileChooser.getSelectedFile();
 
-
+                String fileName = IMG_DIR + file.getName();
                 try (FileInputStream fis = new FileInputStream(file);
-                     FileOutputStream fos = new FileOutputStream("assets/" + file.getName())) {
+                     FileOutputStream fos = new FileOutputStream(fileName)) {
                     byte[] buffer = new byte[fis.available()];
                     fis.read(buffer, 0, buffer.length);
                     fos.write(buffer, 0, buffer.length);
-
+                    images.add(fileName);
                 } catch (IOException m) {
                     m.getStackTrace();
                 }
             }
-
-            validate();
-            repaint();
+            imagePanel.validate();
+            imagePanel.repaint();
         });
 
         navigationPanel.getPreviousButton().addActionListener(e -> {
             if (currentImageIndex > 0) {
                 currentImageIndex--;
                 loadImage();
-                validate();
-                repaint();
+                imagePanel.validate();
+                imagePanel.repaint();
             }
         });
 
         navigationPanel.getSizeDownButton().addActionListener(e -> {
-            try {
-                BufferedImage img = ImageIO.read(new File(IMG_DIR + images.get(currentImageIndex)));
-                Image dimg = img.getScaledInstance(10, 10,
-                        Image.SCALE_SMOOTH);
-                ImageIcon imageIcon = new ImageIcon(dimg);
-            } catch (IOException a) {
-                a.printStackTrace();
+            if (currentImage != null) {
+                final int newWidth = Math.max(currentImage.getWidth(null) * 9 / 10, 1);
+                final int newHeight = Math.max(currentImage.getHeight(null) * 9 / 10, 1);
+                Image scaledImage = currentImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+                imagePanel.loadImage(scaledImage);
+                imagePanel.validate();
+                imagePanel.repaint();
+                currentImage = scaledImage;
             }
         });
 
-    }
+        navigationPanel.getSizeUpButton().addActionListener(e -> {
+            if (currentImage != null) {
+                final int newWidth = Math.max(currentImage.getWidth(null) * 11 / 10, 1);
+                final int newHeight = Math.max(currentImage.getHeight(null) * 11 / 10, 1);
+                Image scaledImage = currentImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+                imagePanel.loadImage(scaledImage);
+                imagePanel.validate();
+                imagePanel.repaint();
+                currentImage = scaledImage;
+            }
+        });
 
+        navigationPanel.getNextButton().addActionListener(e -> {
+            if (currentImageIndex < images.size() - 1) {
+                currentImageIndex++;
+                loadImage();
+                imagePanel.validate();
+                imagePanel.repaint();
+            }
+        });
+    }
 }
